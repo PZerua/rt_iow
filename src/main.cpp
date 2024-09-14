@@ -23,9 +23,16 @@ int main()
 
     renderer->set_required_limits(required_limits);
 
-    if (engine->initialize(renderer)) {
+    Engine::sEngineConfiguration configuration;
+    configuration.window_width = 400;
+    configuration.window_height = 400;
+
+    if (engine->initialize(renderer, configuration)) {
         return 1;
     }
+
+    renderer->generate_frame();
+    renderer->save_frame();
 
     engine->start_loop();
 
