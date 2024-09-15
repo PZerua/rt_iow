@@ -6,6 +6,9 @@
 
 #include "graphics/ray.h"
 
+#include "hittables/sphere.h"
+#include "hittables/hittable_list.h"
+
 class RTRenderer : public Renderer {
 
     std::vector<uint8_t> rendered_image;
@@ -17,7 +20,12 @@ class RTRenderer : public Renderer {
 
     glm::dvec3 camera_center;
 
-    glm::dvec3 ray_intersect(const Ray& ray);
+    MeshInstance3D* screen_mesh;
+    Texture* screen_texture;
+
+    Hittable_list world;
+
+    glm::dvec3 ray_intersect(const Ray& ray, const Hittable& world);
 
     void write_color(uint32_t x, uint32_t y, const glm::dvec3& color);
 
@@ -30,6 +38,8 @@ public:
 
     void update(float delta_time) override;
     void render() override;
+
+    double hit_sphere(const glm::dvec3& center, double radius, const Ray& r);
 
     void generate_frame();
     void save_frame();
