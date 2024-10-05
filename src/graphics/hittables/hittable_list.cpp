@@ -1,12 +1,13 @@
 #include "hittable_list.h"
 
-bool Hittable_list::hit(const Ray& r, double ray_tmin, double ray_tmax, hit_record& rec) const {
+bool Hittable_list::hit(const Ray& r, const Interval& interval, hit_record& rec) const
+{
     hit_record temp_rec;
     bool hit_anything = false;
-    auto closest_so_far = ray_tmax;
+    auto closest_so_far = interval.max;
 
     for (const auto& object : objects) {
-        if (object->hit(r, ray_tmin, closest_so_far, temp_rec)) {
+        if (object->hit(r, { interval.min, closest_so_far }, temp_rec)) {
             hit_anything = true;
             closest_so_far = temp_rec.t;
             rec = temp_rec;

@@ -18,5 +18,5 @@ public:
         objects.push_back(object);
     }
 
-    bool hit(const Ray& r, double ray_tmin, double ray_tmax, hit_record& rec) const override;
+    bool hit(const Ray& r, const Interval& interval, hit_record& rec) const override;
 };

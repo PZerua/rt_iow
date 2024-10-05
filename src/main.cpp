@@ -23,7 +23,7 @@ int main()
 
     renderer->set_required_limits(required_limits);
 
-    Engine::sEngineConfiguration configuration;
+    sEngineConfiguration configuration;
     configuration.window_width = 640;
     configuration.window_height = 360;
 

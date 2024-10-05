@@ -1,6 +1,7 @@
 #include "sphere.h"
 
-bool Sphere::hit(const Ray& ray, double ray_tmin, double ray_tmax, hit_record& rec) const {
+bool Sphere::hit(const Ray& ray, const Interval& interval, hit_record& rec) const
+{
     glm::dvec3 oc = center - ray.origin();
     auto a = glm::length2(ray.direction());
     auto h = dot(ray.direction(), oc);
@@ -14,9 +15,9 @@ bool Sphere::hit(const Ray& ray, double ray_tmin, double ray_tmax, hit_record& r
 
     // Find the nearest root that lies in the acceptable range.
     auto root = (h - sqrtd) / a;
-    if (root <= ray_tmin || ray_tmax <= root) {
+    if (!interval.surrounds(root)) {
         root = (h + sqrtd) / a;
-        if (root <= ray_tmin || ray_tmax <= root)
+        if (!interval.surrounds(root))
             return false;
     }
 
