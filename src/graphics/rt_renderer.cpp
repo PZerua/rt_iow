@@ -11,6 +11,8 @@
 
 #include "glm/gtx/norm.hpp"
 
+#include "spdlog/spdlog.h"
+
 #include <fstream>
 #include <iostream>
 
@@ -19,22 +21,32 @@ RTRenderer::RTRenderer() : Renderer()
 
 }
 
-int RTRenderer::initialize(GLFWwindow* window, bool use_mirror_screen)
+int RTRenderer::pre_initialize(GLFWwindow* window, bool use_mirror_screen)
 {
-    Renderer::initialize(window, use_mirror_screen);
+    return Renderer::pre_initialize(window, use_mirror_screen);
+}
+
+int RTRenderer::initialize()
+{
+    int error_code = Renderer::initialize();
 
     clear_color = glm::vec4(0.22f, 0.22f, 0.22f, 1.0);
 
+    return error_code;
+}
+
+int RTRenderer::post_initialize()
+{
+    Renderer::post_initialize();
+
     rendered_image.resize(webgpu_context->screen_width * webgpu_context->screen_height * 4);
-
-    screen_mesh = new MeshInstance3D();
-
-    Surface* screen_surface = new Surface();
 
     setup_camera();
 
-    // TODO: backface culled!!
+    Surface* screen_surface = new Surface();
     screen_surface->create_quad(2.0f, 2.0f);
+
+    screen_mesh = new MeshInstance3D();
     screen_mesh->add_surface(screen_surface);
 
     camera_2d->set_view(glm::mat4x4(1.0f));
@@ -49,13 +61,15 @@ int RTRenderer::initialize(GLFWwindow* window, bool use_mirror_screen)
     screen_material->set_depth_write(false);
     screen_material->set_type(MATERIAL_UNLIT);
     screen_material->set_diffuse_texture(screen_texture);
-    screen_material->set_cull_type(CULL_NONE);
-    screen_material->set_shader(RendererStorage::get_shader_from_source(shaders::mesh_forward::source, shaders::mesh_forward::path, screen_material));
+    screen_material->set_shader(RendererStorage::get_shader_from_source(shaders::mesh_forward::source, shaders::mesh_forward::path, shaders::mesh_forward::libraries, screen_material));
 
     screen_surface->set_material(screen_material);
 
-    world.add(new Sphere(glm::dvec3(0, 0, -1), 0.5));
-    world.add(new Sphere(glm::dvec3(0, -100.5, -1), 100));
+    // scene
+    {
+        world.add(new Sphere(glm::dvec3(0, 0, -1), 0.5));
+        world.add(new Sphere(glm::dvec3(0, -100.5, -1), 100));
+    }
 
     return 0;
 }
@@ -155,8 +169,12 @@ void RTRenderer::write_color(uint32_t x, uint32_t y, const glm::dvec3& color)
 
 void RTRenderer::generate_frame()
 {
+    spdlog::info("Generate Frame");
+
     for (int y = 0; y < webgpu_context->screen_height; y++) {
+#ifndef __EMSCRIPTEN__
         std::clog << "\rScanlines remaining: " << (webgpu_context->screen_height - y) << ' ' << std::flush;
+#endif
         for (int x = 0; x < webgpu_context->screen_width; x++) {
             glm::dvec3 pixel_color = glm::dvec3(0.0);
 
@@ -168,7 +186,10 @@ void RTRenderer::generate_frame()
             write_color(x, y, pixel_color * tracing_camera.pixel_samples_scale);
         }
     }
+
+#ifndef __EMSCRIPTEN__
     std::clog << "\rDone.                 \n";
+#endif
 
     screen_texture->update(rendered_image.data(), 0, {});
 }

@@ -26,10 +26,10 @@ class RTRenderer : public Renderer {
 
     std::vector<uint8_t> rendered_image;
 
-    MeshInstance3D* screen_mesh;
-    Texture* screen_texture;
+    MeshInstance3D* screen_mesh = nullptr;
+    Texture* screen_texture = nullptr;
 
-    sTracingCamera tracing_camera;
+    sTracingCamera tracing_camera = {};
 
     Hittable_list world;
 
@@ -46,17 +46,18 @@ public:
 
     RTRenderer();
 
-    int initialize(GLFWwindow* window, bool use_mirror_screen = false) override;
+    int pre_initialize(GLFWwindow* window, bool use_mirror_screen = false) override;
+    int initialize() override;
+    int post_initialize() override;
+
     void clean() override;
 
     void update(float delta_time) override;
     void render() override;
 
-    double hit_sphere(const glm::dvec3& center, double radius, const Ray& r);
-
     void generate_frame();
     void save_frame();
 
-    virtual void resize_window(int width, int height);
+    virtual void resize_window(int width, int height) override;
 
 };

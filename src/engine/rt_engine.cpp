@@ -20,6 +20,11 @@ int RTEngine::initialize(Renderer* renderer, sEngineConfiguration configuration)
 	return error;
 }
 
+int RTEngine::post_initialize()
+{
+    return Engine::post_initialize();
+}
+
 void RTEngine::clean()
 {
     Engine::clean();
