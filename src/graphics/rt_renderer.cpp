@@ -6,6 +6,7 @@
 
 #include "graphics/materials/lambertian_material.h"
 #include "graphics/materials/metallic_material.h"
+#include "graphics/materials/dielectric_material.h"
 
 #include "framework/nodes/mesh_instance_3d.h"
 #include "framework/camera/camera_2d.h"
@@ -76,12 +77,14 @@ int RTRenderer::post_initialize()
     {
         RTMaterial* material_ground = new LambertianMaterial({ 0.8, 0.8, 0.0 });
         RTMaterial* material_center = new LambertianMaterial({ 0.1, 0.2, 0.5 });
-        RTMaterial* material_left = new MetallicMaterial({ 0.8, 0.8, 0.8 }, 0.3);
+        RTMaterial* material_left = new DielectricMaterial(1.5);
+        RTMaterial* material_bubble = new DielectricMaterial(1.0 / 1.5);
         RTMaterial* material_right = new MetallicMaterial({ 0.8, 0.6, 0.2 }, 1.0);
 
         world.add(new Sphere(glm::dvec3(0.0, -100.5, -1.0), 100.0, material_ground));
         world.add(new Sphere(glm::dvec3(0.0, 0.0, -1.2), 0.5, material_center));
         world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.5, material_left));
+        world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.4, material_bubble));
         world.add(new Sphere(glm::dvec3(1.0, 0.0, -1.0), 0.5, material_right));
     }
 
