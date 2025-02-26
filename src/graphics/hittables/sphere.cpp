@@ -24,6 +24,8 @@ bool Sphere::hit(const Ray& ray, const Interval& interval, hit_record& rec) cons
     rec.t = root;
     rec.p = ray.at(rec.t);
     rec.normal = (rec.p - center) / radius;
+    rec.mat = mat;
+
     glm::dvec3 outward_normal = (rec.p - center) / radius;
     rec.set_face_normal(ray, outward_normal);
 

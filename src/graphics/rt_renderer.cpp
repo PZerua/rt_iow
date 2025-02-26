@@ -4,8 +4,12 @@
 #include "graphics/texture.h"
 #include "graphics/renderer_storage.h"
 
+#include "graphics/materials/lambertian_material.h"
+#include "graphics/materials/metallic_material.h"
+
 #include "framework/nodes/mesh_instance_3d.h"
 #include "framework/camera/camera_2d.h"
+#include "framework/utils/timer.h"
 
 #include "shaders/mesh_forward.wgsl.gen.h"
 
@@ -43,6 +47,7 @@ int RTRenderer::post_initialize()
 
     setup_camera();
 
+    // quad mesh to show gpu texture on window
     Surface* screen_surface = new Surface();
     screen_surface->create_quad(2.0f, 2.0f);
 
@@ -51,10 +56,12 @@ int RTRenderer::post_initialize()
 
     camera_2d->set_view(glm::mat4x4(1.0f));
     camera_2d->set_projection(glm::mat4x4(1.0f));
-    
+
+    // gpu texture to store the generated frame
     screen_texture = new Texture();
     screen_texture->create(WGPUTextureDimension_2D, WGPUTextureFormat_RGBA8UnormSrgb, { webgpu_context->screen_width, webgpu_context->screen_height, 1 }, WGPUTextureUsage_CopyDst | WGPUTextureUsage_TextureBinding, 1, 1, nullptr);
 
+    // material to show generated frame on window
     Material* screen_material = new Material();
     screen_material->set_is_2D(true);
     screen_material->set_depth_read(false);
@@ -67,8 +74,15 @@ int RTRenderer::post_initialize()
 
     // scene
     {
-        world.add(new Sphere(glm::dvec3(0, 0, -1), 0.5));
-        world.add(new Sphere(glm::dvec3(0, -100.5, -1), 100));
+        RTMaterial* material_ground = new LambertianMaterial({ 0.8, 0.8, 0.0 });
+        RTMaterial* material_center = new LambertianMaterial({ 0.1, 0.2, 0.5 });
+        RTMaterial* material_left = new MetallicMaterial({ 0.8, 0.8, 0.8 }, 0.3);
+        RTMaterial* material_right = new MetallicMaterial({ 0.8, 0.6, 0.2 }, 1.0);
+
+        world.add(new Sphere(glm::dvec3(0.0, -100.5, -1.0), 100.0, material_ground));
+        world.add(new Sphere(glm::dvec3(0.0, 0.0, -1.2), 0.5, material_center));
+        world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.5, material_left));
+        world.add(new Sphere(glm::dvec3(1.0, 0.0, -1.0), 0.5, material_right));
     }
 
     return 0;
@@ -100,6 +114,8 @@ void RTRenderer::setup_camera()
 
     tracing_camera.samples_per_pixel = 50;
     tracing_camera.pixel_samples_scale = 1.0 / tracing_camera.samples_per_pixel;
+
+    tracing_camera.max_depth = 50;
 }
 
 Ray RTRenderer::get_ray(int x, int y)
@@ -142,11 +158,22 @@ void RTRenderer::render()
     Renderer::render();
 }
 
-glm::dvec3 RTRenderer::ray_intersect(const Ray& ray, const Hittable& world)
+glm::dvec3 RTRenderer::ray_intersect(const Ray& ray, int depth, const Hittable& world)
 {
+    if (depth <= 0) {
+        return { 0.0, 0.0, 0.0 };
+    }
+
     hit_record rec;
-    if (world.hit(ray, { 0, infinity }, rec)) {
-        return 0.5 * (rec.normal + glm::dvec3(1, 1, 1));
+    if (world.hit(ray, { 0.001, infinity }, rec)) {
+        Ray scattered;
+        glm::dvec3 attenutation;
+
+        if (rec.mat->scatter(ray, rec, attenutation, scattered)) {
+            return attenutation * ray_intersect(scattered, depth - 1, world);
+        }
+
+        return glm::dvec3(0.0, 0.0, 0.0);
     }
 
     glm::dvec3 unit_direction = glm::normalize(ray.direction());
@@ -154,13 +181,21 @@ glm::dvec3 RTRenderer::ray_intersect(const Ray& ray, const Hittable& world)
     return (1.0 - a) * glm::dvec3(1.0, 1.0, 1.0) + a * glm::dvec3(0.5, 0.7, 1.0);
 }
 
+double RTRenderer::linear_to_gamma(double linear_component)
+{
+    if (linear_component > 0)
+        return std::sqrt(linear_component);
+
+    return 0;
+}
+
 void RTRenderer::write_color(uint32_t x, uint32_t y, const glm::dvec3& color)
 {
     glm::dvec3 clampled_color = glm::clamp(color);
 
-    uint8_t r8 = static_cast<uint8_t>(clampled_color.r * 255.999);
-    uint8_t g8 = static_cast<uint8_t>(clampled_color.g * 255.999);
-    uint8_t b8 = static_cast<uint8_t>(clampled_color.b * 255.999);
+    uint8_t r8 = static_cast<uint8_t>(linear_to_gamma(clampled_color.r) * 255.999);
+    uint8_t g8 = static_cast<uint8_t>(linear_to_gamma(clampled_color.g) * 255.999);
+    uint8_t b8 = static_cast<uint8_t>(linear_to_gamma(clampled_color.b) * 255.999);
 
     rendered_image[x * 4 + 0 + y * webgpu_context->screen_width * 4] = r8;
     rendered_image[x * 4 + 1 + y * webgpu_context->screen_width * 4] = g8;
@@ -169,6 +204,9 @@ void RTRenderer::write_color(uint32_t x, uint32_t y, const glm::dvec3& color)
 
 void RTRenderer::generate_frame()
 {
+    Timer frame_time;
+    frame_time.start();
+
     spdlog::info("Generate Frame");
 
     for (int y = 0; y < webgpu_context->screen_height; y++) {
@@ -180,7 +218,7 @@ void RTRenderer::generate_frame()
 
             for (int sample = 0; sample < tracing_camera.samples_per_pixel; sample++) {
                 Ray ray = get_ray(x, y);
-                pixel_color += ray_intersect(ray, world);
+                pixel_color += ray_intersect(ray, tracing_camera.max_depth, world);
             }
 
             write_color(x, y, pixel_color * tracing_camera.pixel_samples_scale);
@@ -190,6 +228,8 @@ void RTRenderer::generate_frame()
 #ifndef __EMSCRIPTEN__
     std::clog << "\rDone.                 \n";
 #endif
+
+    frame_time.print_elapsed_time_s();
 
     screen_texture->update(rendered_image.data(), 0, {});
 }

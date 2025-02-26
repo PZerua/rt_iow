@@ -5,9 +5,12 @@
 
 #include "framework/math/math_utils.h"
 
+class RTMaterial;
+
 struct hit_record {
     glm::dvec3 p;
     glm::dvec3 normal;
+    RTMaterial* mat;
     double t;
     bool front_face;
 
