@@ -24,8 +24,8 @@ int main()
     renderer->set_required_limits(required_limits);
 
     sEngineConfiguration configuration;
-    configuration.window_width = 640;
-    configuration.window_height = 360;
+    configuration.window_width = 1280;
+    configuration.window_height = 720;
 
     if (engine->initialize(renderer, configuration)) {
         return 1;

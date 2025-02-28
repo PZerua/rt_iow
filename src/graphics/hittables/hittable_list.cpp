@@ -4,7 +4,7 @@ bool Hittable_list::hit(const Ray& r, const Interval& interval, hit_record& rec)
 {
     hit_record temp_rec;
     bool hit_anything = false;
-    auto closest_so_far = interval.max;
+    double closest_so_far = interval.max;
 
     for (const auto& object : objects) {
         if (object->hit(r, { interval.min, closest_so_far }, temp_rec)) {
