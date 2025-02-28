@@ -74,83 +74,84 @@ int RTRenderer::post_initialize()
     tracing_camera.image_height = webgpu_context->screen_height;
 
     // scene 3 spheres
-    {
-        RTMaterial* material_ground = new LambertianMaterial({ 0.8, 0.8, 0.0 });
-        RTMaterial* material_center = new LambertianMaterial({ 0.1, 0.2, 0.5 });
-        RTMaterial* material_left = new DielectricMaterial(1.5);
-        RTMaterial* material_bubble = new DielectricMaterial(1.0 / 1.5);
-        RTMaterial* material_right = new MetallicMaterial({ 0.8, 0.6, 0.2 }, 1.0);
-
-        world.add(new Sphere(glm::dvec3(0.0, -100.5, -1.0), 100.0, material_ground));
-        world.add(new Sphere(glm::dvec3(0.0, 0.0, -1.2), 0.5, material_center));
-        world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.5, material_left));
-        world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.4, material_bubble));
-        world.add(new Sphere(glm::dvec3(1.0, 0.0, -1.0), 0.5, material_right));
-
-        tracing_camera.lookfrom = glm::dvec3(0.0);
-        tracing_camera.lookat = glm::dvec3(0.0, 0.0, -1.0);
-        tracing_camera.vup = glm::dvec3(0.0, 1.0, 0.0);
-
-        tracing_camera.samples_per_pixel = 25;
-
-        tracing_camera.vfov = 90;
-    }
-
-    // scene multiple spheres
     //{
-    //    RTMaterial* material_ground = new LambertianMaterial({ 0.5, 0.5, 0.5 });
-    //    world.add(new Sphere(glm::dvec3(0.0, -1000.0, -1.0), 1000.0, material_ground));
+    //    RTMaterial* material_ground = new LambertianMaterial({ 0.8, 0.8, 0.0 });
+    //    RTMaterial* material_center = new LambertianMaterial({ 0.1, 0.2, 0.5 });
+    //    RTMaterial* material_left = new DielectricMaterial(1.5);
+    //    RTMaterial* material_bubble = new DielectricMaterial(1.0 / 1.5);
+    //    RTMaterial* material_right = new MetallicMaterial({ 0.8, 0.6, 0.2 }, 1.0);
 
-    //    for (int a = -11; a < 11; a++) {
-    //        for (int b = -11; b < 11; b++) {
-    //            double choose_mat = random_d();
-    //            glm::dvec3 center(a + 0.9 * random_d(), 0.2, b + 0.9 * random_d());
+    //    world.add(new Sphere(glm::dvec3(0.0, -100.5, -1.0), 100.0, material_ground));
+    //    world.add(new Sphere(glm::dvec3(0.0, 0.0, -1.2), 0.5, material_center));
+    //    world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.5, material_left));
+    //    world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.4, material_bubble));
+    //    world.add(new Sphere(glm::dvec3(1.0, 0.0, -1.0), 0.5, material_right));
 
-    //            if (glm::length((center - glm::dvec3(4, 0.2, 0))) > 0.9) {
-    //                RTMaterial* sphere_material;
-
-    //                if (choose_mat < 0.8) {
-    //                    // diffuse
-    //                    auto albedo = random_color() * random_color();
-    //                    sphere_material = new LambertianMaterial(albedo);
-    //                    world.add(new Sphere(center, 0.2, sphere_material));
-    //                }
-    //                else if (choose_mat < 0.95) {
-    //                    // metal
-    //                    auto albedo = random_color(0.5, 1);
-    //                    auto fuzz = random_d(0, 0.5);
-    //                    sphere_material = new MetallicMaterial(albedo, fuzz);
-    //                    world.add(new Sphere(center, 0.2, sphere_material));
-    //                }
-    //                else {
-    //                    // glass
-    //                    sphere_material = new DielectricMaterial(1.5);
-    //                    world.add(new Sphere(center, 0.2, sphere_material));
-    //                }
-    //            }
-    //        }
-    //    }
-
-    //    auto material1 = new DielectricMaterial(1.5);
-    //    world.add(new Sphere({ 0, 1, 0 }, 1.0, material1));
-
-    //    auto material2 = new LambertianMaterial({ 0.4, 0.2, 0.1 });
-    //    world.add(new Sphere({ -4, 1, 0 }, 1.0, material2));
-
-    //    auto material3 = new MetallicMaterial({ 0.7, 0.6, 0.5 }, 0.0);
-    //    world.add(new Sphere({ 4, 1, 0 }, 1.0, material3));
-
-    //    tracing_camera.samples_per_pixel = 500;
-    //    tracing_camera.max_depth = 50;
-
-    //    tracing_camera.vfov = 20;
-    //    tracing_camera.lookfrom = glm::dvec3(13, 2, 3);
-    //    tracing_camera.lookat = glm::dvec3(0, 0, 0);
+    //    tracing_camera.lookfrom = glm::dvec3(0.0);
+    //    tracing_camera.lookat = glm::dvec3(0.0, 0.0, -1.0);
     //    tracing_camera.vup = glm::dvec3(0.0, 1.0, 0.0);
 
-    //    tracing_camera.defocus_angle = 0.6;
-    //    tracing_camera.focus_dist = 10.0;
+    //    tracing_camera.samples_per_pixel = 25;
+
+    //    tracing_camera.vfov = 90;
     //}
+
+    // scene multiple spheres
+    {
+        RTMaterial* material_ground = new LambertianMaterial({ 0.5, 0.5, 0.5 });
+        world.add(new Sphere(glm::dvec3(0.0, -1000.0, -1.0), 1000.0, material_ground));
+
+        for (int a = -11; a < 11; a++) {
+            for (int b = -11; b < 11; b++) {
+                double choose_mat = random_d();
+                glm::dvec3 center(a + 0.9 * random_d(), 0.2, b + 0.9 * random_d());
+
+                if (glm::length((center - glm::dvec3(4, 0.2, 0))) > 0.9) {
+                    RTMaterial* sphere_material;
+
+                    if (choose_mat < 0.8) {
+                        // diffuse
+                        auto albedo = random_color() * random_color();
+                        sphere_material = new LambertianMaterial(albedo);
+                        auto center2 = center + glm::dvec3(0, random_d(0, .5), 0);
+                        world.add(new Sphere(center, center2, 0.2, sphere_material));
+                    }
+                    else if (choose_mat < 0.95) {
+                        // metal
+                        auto albedo = random_color(0.5, 1);
+                        auto fuzz = random_d(0, 0.5);
+                        sphere_material = new MetallicMaterial(albedo, fuzz);
+                        world.add(new Sphere(center, 0.2, sphere_material));
+                    }
+                    else {
+                        // glass
+                        sphere_material = new DielectricMaterial(1.5);
+                        world.add(new Sphere(center, 0.2, sphere_material));
+                    }
+                }
+            }
+        }
+
+        auto material1 = new DielectricMaterial(1.5);
+        world.add(new Sphere({ 0, 1, 0 }, 1.0, material1));
+
+        auto material2 = new LambertianMaterial({ 0.4, 0.2, 0.1 });
+        world.add(new Sphere({ -4, 1, 0 }, 1.0, material2));
+
+        auto material3 = new MetallicMaterial({ 0.7, 0.6, 0.5 }, 0.0);
+        world.add(new Sphere({ 4, 1, 0 }, 1.0, material3));
+
+        tracing_camera.samples_per_pixel = 25;
+        tracing_camera.max_depth = 50;
+
+        tracing_camera.vfov = 20;
+        tracing_camera.lookfrom = glm::dvec3(13, 2, 3);
+        tracing_camera.lookat = glm::dvec3(0, 0, 0);
+        tracing_camera.vup = glm::dvec3(0.0, 1.0, 0.0);
+
+        tracing_camera.defocus_angle = 0.6;
+        tracing_camera.focus_dist = 10.0;
+    }
 
     tracing_camera.initialize();
 

@@ -17,7 +17,7 @@ public:
         glm::dvec3 reflected = glm::reflect(r_in.direction(), rec.normal);
         reflected = glm::normalize(reflected) + (fuzz * random_unit_sphere_direction()); // apply random offset to reflection to have fuzziness
 
-        scattered = Ray(rec.p, reflected);
+        scattered = Ray(rec.p, reflected, r_in.time());
         attenuation = albedo;
         return true;
     }

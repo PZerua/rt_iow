@@ -116,8 +116,9 @@ Ray sTracingCamera::get_ray(int x, int y)
 
     glm::dvec3 ray_origin = (defocus_angle <= 0) ? center : defocus_disk_sample();
     glm::dvec3 ray_direction = pixel_sample - ray_origin;
+    double ray_time = random_d();
 
-    return Ray(ray_origin, ray_direction);
+    return Ray(ray_origin, ray_direction, ray_time);
 }
 
 glm::dvec3 sTracingCamera::sample_square() const

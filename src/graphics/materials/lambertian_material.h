@@ -20,7 +20,7 @@ public:
             scatter_direction = rec.normal;
         }
 
-        scattered = Ray(rec.p, scatter_direction);
+        scattered = Ray(rec.p, scatter_direction, r_in.time());
         attenuation = albedo;
         return true;
     }

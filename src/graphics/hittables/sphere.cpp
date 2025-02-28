@@ -2,19 +2,20 @@
 
 bool Sphere::hit(const Ray& ray, const Interval& interval, hit_record& rec) const
 {
-    glm::dvec3 oc = center - ray.origin();
-    auto a = glm::length2(ray.direction());
-    auto h = dot(ray.direction(), oc);
-    auto c = glm::length2(oc) - radius * radius;
+    glm::dvec3 current_center = center.at(ray.time());
+    glm::dvec3 oc = current_center - ray.origin();
+    double a = glm::length2(ray.direction());
+    double h = dot(ray.direction(), oc);
+    double c = glm::length2(oc) - radius * radius;
 
-    auto discriminant = h * h - a * c;
+    double discriminant = h * h - a * c;
     if (discriminant < 0)
         return false;
 
-    auto sqrtd = std::sqrt(discriminant);
+    double sqrtd = std::sqrt(discriminant);
 
     // Find the nearest root that lies in the acceptable range.
-    auto root = (h - sqrtd) / a;
+    double root = (h - sqrtd) / a;
     if (!interval.surrounds(root)) {
         root = (h + sqrtd) / a;
         if (!interval.surrounds(root))
@@ -25,7 +26,7 @@ bool Sphere::hit(const Ray& ray, const Interval& interval, hit_record& rec) cons
     rec.p = ray.at(rec.t);
     rec.mat = mat;
 
-    glm::dvec3 outward_normal = (rec.p - center) / radius;
+    glm::dvec3 outward_normal = (rec.p - current_center) / radius;
     rec.set_face_normal(ray, outward_normal);
 
     return true;
