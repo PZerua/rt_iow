@@ -10,6 +10,12 @@ public:
 
     Interval(double min, double max) : min(min), max(max) {}
 
+    Interval(const Interval& a, const Interval& b) {
+        // Create the interval tightly enclosing the two input intervals.
+        min = a.min <= b.min ? a.min : b.min;
+        max = a.max >= b.max ? a.max : b.max;
+    }
+
     double size() const;
 
     bool contains(double x) const;

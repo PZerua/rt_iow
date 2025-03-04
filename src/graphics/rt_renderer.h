@@ -18,7 +18,7 @@ class RTRenderer : public Renderer {
 
     sTracingCamera tracing_camera = {};
 
-    Hittable_list world;
+    HittableList world;
 
 public:
 

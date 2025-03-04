@@ -3,6 +3,7 @@
 #include "graphics/shader.h"
 #include "graphics/texture.h"
 #include "graphics/renderer_storage.h"
+#include "graphics/hittables/bvh_node.h"
 
 #include "graphics/materials/lambertian_material.h"
 #include "graphics/materials/metallic_material.h"
@@ -141,7 +142,7 @@ int RTRenderer::post_initialize()
         auto material3 = new MetallicMaterial({ 0.7, 0.6, 0.5 }, 0.0);
         world.add(new Sphere({ 4, 1, 0 }, 1.0, material3));
 
-        tracing_camera.samples_per_pixel = 25;
+        tracing_camera.samples_per_pixel = 10;
         tracing_camera.max_depth = 50;
 
         tracing_camera.vfov = 20;
@@ -152,6 +153,8 @@ int RTRenderer::post_initialize()
         tracing_camera.defocus_angle = 0.6;
         tracing_camera.focus_dist = 10.0;
     }
+
+    world = HittableList(new BVHNode(world));
 
     tracing_camera.initialize();
 
