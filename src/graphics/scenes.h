@@ -1,0 +1,130 @@
+#pragma once
+
+#include "hittables/hittable_list.h"
+#include "hittables/bvh_node.h"
+#include "hittables/sphere.h"
+
+#include "graphics/materials/lambertian_material.h"
+#include "graphics/materials/metallic_material.h"
+#include "graphics/materials/dielectric_material.h"
+
+#include "graphics/rt_camera.h"
+
+namespace scenes {
+
+    void three_spheres(HittableList& world, sTracingCamera& tracing_camera)
+    {
+        RtMaterial* material_ground = new LambertianMaterial({ 0.8, 0.8, 0.0 });
+        RtMaterial* material_center = new LambertianMaterial({ 0.1, 0.2, 0.5 });
+        RtMaterial* material_left = new DielectricMaterial(1.5);
+        RtMaterial* material_bubble = new DielectricMaterial(1.0 / 1.5);
+        RtMaterial* material_right = new MetallicMaterial({ 0.8, 0.6, 0.2 }, 1.0);
+
+        world.add(new Sphere(glm::dvec3(0.0, -100.5, -1.0), 100.0, material_ground));
+        world.add(new Sphere(glm::dvec3(0.0, 0.0, -1.2), 0.5, material_center));
+        world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.5, material_left));
+        world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.4, material_bubble));
+        world.add(new Sphere(glm::dvec3(1.0, 0.0, -1.0), 0.5, material_right));
+
+        tracing_camera.lookfrom = glm::dvec3(0.0);
+        tracing_camera.lookat = glm::dvec3(0.0, 0.0, -1.0);
+        tracing_camera.vup = glm::dvec3(0.0, 1.0, 0.0);
+
+        tracing_camera.samples_per_pixel = 25;
+
+        tracing_camera.vfov = 90;
+    }
+
+    void bouncing_spheres(HittableList& world, sTracingCamera& tracing_camera)
+    {
+
+        RtTexture* checker = new CheckerTexture(0.32, glm::dvec3(.2, .3, .1), glm::dvec3(.9, .9, .9));
+        world.add(new Sphere(glm::dvec3(0, -1000, 0), 1000, new LambertianMaterial(checker)));
+
+        for (int a = -11; a < 11; a++) {
+            for (int b = -11; b < 11; b++) {
+                double choose_mat = random_d();
+                glm::dvec3 center(a + 0.9 * random_d(), 0.2, b + 0.9 * random_d());
+
+                if (glm::length((center - glm::dvec3(4, 0.2, 0))) > 0.9) {
+                    RtMaterial* sphere_material;
+
+                    if (choose_mat < 0.8) {
+                        // diffuse
+                        auto albedo = random_color() * random_color();
+                        sphere_material = new LambertianMaterial(albedo);
+                        auto center2 = center + glm::dvec3(0, random_d(0, .5), 0);
+                        world.add(new Sphere(center, center2, 0.2, sphere_material));
+                    }
+                    else if (choose_mat < 0.95) {
+                        // metal
+                        auto albedo = random_color(0.5, 1);
+                        auto fuzz = random_d(0, 0.5);
+                        sphere_material = new MetallicMaterial(albedo, fuzz);
+                        world.add(new Sphere(center, 0.2, sphere_material));
+                    }
+                    else {
+                        // glass
+                        sphere_material = new DielectricMaterial(1.5);
+                        world.add(new Sphere(center, 0.2, sphere_material));
+                    }
+                }
+            }
+        }
+
+        auto material1 = new DielectricMaterial(1.5);
+        world.add(new Sphere({ 0, 1, 0 }, 1.0, material1));
+
+        auto material2 = new LambertianMaterial({ 0.4, 0.2, 0.1 });
+        world.add(new Sphere({ -4, 1, 0 }, 1.0, material2));
+
+        auto material3 = new MetallicMaterial({ 0.7, 0.6, 0.5 }, 0.0);
+        world.add(new Sphere({ 4, 1, 0 }, 1.0, material3));
+
+        tracing_camera.samples_per_pixel = 10;
+        tracing_camera.max_depth = 50;
+
+        tracing_camera.vfov = 20;
+        tracing_camera.lookfrom = glm::dvec3(13, 2, 3);
+        tracing_camera.lookat = glm::dvec3(0, 0, 0);
+        tracing_camera.vup = glm::dvec3(0.0, 1.0, 0.0);
+
+        tracing_camera.defocus_angle = 0.6;
+        tracing_camera.focus_dist = 10.0;
+    }
+
+    void checkered_spheres(HittableList& world, sTracingCamera& tracing_camera)
+    {
+        RtTexture* checker = new CheckerTexture(0.32, glm::dvec3(.2, .3, .1), glm::dvec3(.9, .9, .9));
+
+        world.add(new Sphere(glm::dvec3(0, -10, 0), 10, new LambertianMaterial(checker)));
+        world.add(new Sphere(glm::dvec3(0, 10, 0), 10, new LambertianMaterial(checker)));
+
+        tracing_camera.samples_per_pixel = 1;
+        tracing_camera.max_depth = 50;
+
+        tracing_camera.vfov = 20;
+        tracing_camera.lookfrom = glm::dvec3(13, 2, 3);
+        tracing_camera.lookat = glm::dvec3(0, 0, 0);
+        tracing_camera.vup = glm::dvec3(0, 1, 0);
+
+        tracing_camera.defocus_angle = 0;
+    }
+
+    void earth(HittableList& world, sTracingCamera& tracing_camera)
+    {
+        auto earth_texture = new ImageTexture("data/textures/earthmap.jpg");
+        auto earth_surface = new LambertianMaterial(earth_texture);
+        world.add(new Sphere(glm::dvec3(0, 0, 0), 2, earth_surface));
+
+        tracing_camera.samples_per_pixel = 100;
+        tracing_camera.max_depth = 50;
+
+        tracing_camera.vfov = 20;
+        tracing_camera.lookfrom = glm::dvec3(0, 0, 12);
+        tracing_camera.lookat = glm::dvec3(0, 0, 0);
+        tracing_camera.vup = glm::dvec3(0, 1, 0);
+
+        tracing_camera.defocus_angle = 0;
+    }
+}

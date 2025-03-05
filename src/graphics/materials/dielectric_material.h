@@ -4,7 +4,7 @@
 
 #include "framework/math/math_utils.h"
 
-class DielectricMaterial : public RTMaterial {
+class DielectricMaterial : public RtMaterial {
 
     double refraction_index;
 

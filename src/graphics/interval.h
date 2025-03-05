@@ -22,5 +22,7 @@ public:
 
     bool surrounds(double x) const;
 
+    double clamp(double x) const;
+
     static const Interval empty, universe;
 };

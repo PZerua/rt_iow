@@ -2,14 +2,17 @@
 
 #include "rt_material.h"
 
+#include "graphics/rt_texture.h"
+
 #include "framework/math/math_utils.h"
 
-class LambertianMaterial : public RTMaterial {
+class LambertianMaterial : public RtMaterial {
 
-    glm::dvec3 albedo;
+    RtTexture* tex;
 
 public:
-    LambertianMaterial(const glm::dvec3& albedo) : albedo(albedo) {}
+    LambertianMaterial(const glm::dvec3& albedo) : tex(new SolidColor(albedo)) {}
+    LambertianMaterial(RtTexture* tex) : tex(tex) {}
 
     bool scatter(const Ray& r_in, const hit_record& rec, glm::dvec3& attenuation, Ray& scattered) const override
     {
@@ -21,7 +24,7 @@ public:
         }
 
         scattered = Ray(rec.p, scatter_direction, r_in.time());
-        attenuation = albedo;
+        attenuation = tex->value(rec.u, rec.v, rec.p);
         return true;
     }
 

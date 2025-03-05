@@ -2,10 +2,10 @@
 
 #include "graphics/hittables/hittable.h"
 
-class RTMaterial {
+class RtMaterial {
 
 public:
-    virtual ~RTMaterial() = default;
+    virtual ~RtMaterial() = default;
 
     virtual bool scatter(const Ray& r_in, const hit_record& rec, glm::dvec3& attenuation, Ray& scattered) const {
         return false;

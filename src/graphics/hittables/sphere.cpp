@@ -29,5 +29,7 @@ bool Sphere::hit(const Ray& ray, const Interval& interval, hit_record& rec) cons
     glm::dvec3 outward_normal = (rec.p - current_center) / radius;
     rec.set_face_normal(ray, outward_normal);
 
+    get_sphere_uv(outward_normal, rec.u, rec.v);
+
     return true;
 }

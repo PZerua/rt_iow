@@ -6,13 +6,15 @@
 
 #include "framework/math/math_utils.h"
 
-class RTMaterial;
+class RtMaterial;
 
 struct hit_record {
     glm::dvec3 p;
     glm::dvec3 normal;
-    RTMaterial* mat;
+    RtMaterial* mat;
     double t;
+    double u;
+    double v;
     bool front_face;
 
     void set_face_normal(const Ray& r, const glm::dvec3& outward_normal) {

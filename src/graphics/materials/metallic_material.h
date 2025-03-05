@@ -4,7 +4,7 @@
 
 #include "framework/math/math_utils.h"
 
-class MetallicMaterial : public RTMaterial {
+class MetallicMaterial : public RtMaterial {
 
     glm::dvec3 albedo;
     double fuzz;
