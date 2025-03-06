@@ -10,7 +10,10 @@ struct RtAABB {
     RtAABB() {} // The default RtAABB is empty, since Intervals are empty by default.
 
     RtAABB(const Interval& x, const Interval& y, const Interval& z)
-        : x(x), y(y), z(z) {}
+        : x(x), y(y), z(z)
+    {
+        pad_to_minimums();
+    }
 
     RtAABB(const glm::dvec3& a, const glm::dvec3& b) {
         // Treat the two points a and b as extrema for the bounding box, so we don't require a
@@ -19,6 +22,8 @@ struct RtAABB {
         x = (a[0] <= b[0]) ? Interval(a[0], b[0]) : Interval(b[0], a[0]);
         y = (a[1] <= b[1]) ? Interval(a[1], b[1]) : Interval(b[1], a[1]);
         z = (a[2] <= b[2]) ? Interval(a[2], b[2]) : Interval(b[2], a[2]);
+
+        pad_to_minimums();
     }
 
     RtAABB(const RtAABB& box0, const RtAABB& box1) {
@@ -70,4 +75,16 @@ struct RtAABB {
     }
 
     static const RtAABB empty, universe;
+
+
+private:
+
+    void pad_to_minimums() {
+        // Adjust the AABB so that no side is narrower than some delta, padding if necessary.
+
+        double delta = 0.0001;
+        if (x.size() < delta) x = x.expand(delta);
+        if (y.size() < delta) y = y.expand(delta);
+        if (z.size() < delta) z = z.expand(delta);
+    }
 };

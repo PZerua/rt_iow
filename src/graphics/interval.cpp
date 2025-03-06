@@ -20,3 +20,8 @@ double Interval::clamp(double x) const {
     if (x > max) return max;
     return x;
 }
+
+Interval Interval::expand(double delta) const {
+    auto padding = delta / 2;
+    return Interval(min - padding, max + padding);
+}

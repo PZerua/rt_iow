@@ -24,5 +24,7 @@ public:
 
     double clamp(double x) const;
 
+    Interval expand(double delta) const;
+
     static const Interval empty, universe;
 };

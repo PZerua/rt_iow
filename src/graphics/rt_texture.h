@@ -65,11 +65,11 @@ public:
         u = Interval(0, 1).clamp(u);
         v = 1.0 - Interval(0, 1).clamp(v);  // Flip V to image coordinates
 
-        auto i = int(u * texture_data.image_width);
-        auto j = int(v * texture_data.image_height);
-        auto pixel = texture_data.pixel_data(i, j);
+        int i = int(u * texture_data.image_width);
+        int j = int(v * texture_data.image_height);
+        const uint8_t* pixel = texture_data.pixel_data(i, j);
 
-        auto color_scale = 1.0 / 255.0;
+        float color_scale = 1.0 / 255.0;
         return glm::dvec3(color_scale * pixel[0], color_scale * pixel[1], color_scale * pixel[2]);
     }
 

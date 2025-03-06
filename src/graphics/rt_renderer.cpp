@@ -86,8 +86,9 @@ int RTRenderer::post_initialize()
     //scenes::checkered_spheres(world, tracing_camera);
 
     // scene multiple spheres
-    scenes::earth(world, tracing_camera);
+    //scenes::earth(world, tracing_camera);
 
+    scenes::quads(world, tracing_camera);
 
     world = HittableList(new BVHNode(world));
 
