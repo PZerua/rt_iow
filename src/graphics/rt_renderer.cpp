@@ -77,7 +77,7 @@ int RTRenderer::post_initialize()
     tracing_camera.image_height = webgpu_context->screen_height;
 
     // scene 3 spheres
-    // scenes::three_spheres(world, tracing_camera);
+    scenes::three_spheres(world, tracing_camera);
 
     // scene multiple spheres
     //scenes::bouncing_spheres(world, tracing_camera);
@@ -88,9 +88,13 @@ int RTRenderer::post_initialize()
     // scene multiple spheres
     //scenes::earth(world, tracing_camera);
 
-    scenes::quads(world, tracing_camera);
+    //scenes::quads(world, tracing_camera);
 
-    world = HittableList(new BVHNode(world));
+    //scenes::simple_light(world, tracing_camera);
+
+    //scenes::cornell_box(world, tracing_camera);
+
+    //world = HittableList(new BVHNode(world));
 
     tracing_camera.initialize();
 

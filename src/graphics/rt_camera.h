@@ -15,7 +15,9 @@ struct sTracingCamera {
 
     int         max_depth = 10; // Maximum number of ray bounces into scene
 
-    double vfov = 90; // Vertical view angle (field of view)
+    glm::dvec3  background = {}; // Scene background color
+
+    double      vfov = 90; // Vertical view angle (field of view)
 
     glm::dvec3 lookfrom = glm::dvec3(0, 0, 0); // Point camera is looking from
     glm::dvec3 lookat = glm::dvec3(0, 0, -1);  // Point camera is looking at

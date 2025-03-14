@@ -9,9 +9,9 @@ BVHNode::BVHNode(HittableList list) : BVHNode(list.objects, 0, list.objects.size
 BVHNode::BVHNode(std::vector<Hittable*>& objects, size_t start, size_t end)
 {
     // Build the bounding box of the span of source objects.
-    bbox = RtAABB::empty;
+    bbox = AABB();
     for (size_t object_index = start; object_index < end; object_index++)
-        bbox = RtAABB(bbox, objects[object_index]->bounding_box());
+        bbox = merge_aabbs(bbox, objects[object_index]->bounding_box());
 
     int axis = bbox.longest_axis();
 
@@ -38,7 +38,7 @@ BVHNode::BVHNode(std::vector<Hittable*>& objects, size_t start, size_t end)
 }
 
 inline bool BVHNode::hit(const Ray& r, const Interval& ray_t, hit_record& rec) const {
-    if (!bbox.hit(r, ray_t))
+    if (!bbox.ray_intersection(r.origin(), r.direction(), ray_t.min, ray_t.max))
         return false;
 
     bool hit_left = left->hit(r, ray_t, rec);

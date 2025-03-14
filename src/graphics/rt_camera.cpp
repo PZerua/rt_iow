@@ -87,20 +87,22 @@ glm::dvec3 sTracingCamera::ray_intersect(const Ray& ray, int depth, const Hittab
     }
 
     hit_record rec;
-    if (world.hit(ray, { 0.001, infinity }, rec)) {
-        Ray scattered;
-        glm::dvec3 attenutation;
 
-        if (rec.mat->scatter(ray, rec, attenutation, scattered)) {
-            return attenutation * ray_intersect(scattered, depth - 1, world);
-        }
+    // If the ray hits nothing, return the background color.
+    if (!world.hit(ray, { 0.001, infinity }, rec))
+        return background;
 
-        return glm::dvec3(0.0, 0.0, 0.0);
+    Ray scattered;
+    glm::dvec3 attenuation;
+    glm::dvec3 color_from_emission = rec.mat->emitted(rec.u, rec.v, rec.p);
+
+    if (!rec.mat->scatter(ray, rec, attenuation, scattered)) {
+        return color_from_emission;
     }
 
-    glm::dvec3 unit_direction = glm::normalize(ray.direction());
-    auto a = 0.5 * (unit_direction.y + 1.0);
-    return (1.0 - a) * glm::dvec3(1.0, 1.0, 1.0) + a * glm::dvec3(0.5, 0.7, 1.0);
+    glm::dvec3 color_from_scatter = attenuation * ray_intersect(scattered, depth - 1, world);
+
+    return color_from_emission + color_from_scatter;
 }
 
 Ray sTracingCamera::get_ray(int x, int y)

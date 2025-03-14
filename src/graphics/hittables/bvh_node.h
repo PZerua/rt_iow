@@ -12,19 +12,16 @@ public:
 
     bool hit(const Ray& r, const Interval& ray_t, hit_record& rec) const override;
 
-    RtAABB bounding_box() const override { return bbox; }
-
 private:
     Hittable* left = nullptr;
     Hittable* right = nullptr;
-    RtAABB bbox;
 
     static bool box_compare(
         const Hittable* a, const Hittable* b, int axis_index
     ) {
-        auto a_axis_interval = a->bounding_box().axis_interval(axis_index);
-        auto b_axis_interval = b->bounding_box().axis_interval(axis_index);
-        return a_axis_interval.min < b_axis_interval.min;
+        float a_axis_interval = a->bounding_box().axis_min(axis_index);
+        float b_axis_interval = b->bounding_box().axis_min(axis_index);
+        return a_axis_interval < b_axis_interval;
     }
 
     static bool box_x_compare(const Hittable* a, const Hittable* b) {

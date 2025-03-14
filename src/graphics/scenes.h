@@ -8,6 +8,7 @@
 #include "graphics/materials/lambertian_material.h"
 #include "graphics/materials/metallic_material.h"
 #include "graphics/materials/dielectric_material.h"
+#include "graphics/materials/diffuse_light.h"
 
 #include "graphics/rt_camera.h"
 
@@ -21,19 +22,25 @@ namespace scenes {
         RtMaterial* material_bubble = new DielectricMaterial(1.0 / 1.5);
         RtMaterial* material_right = new MetallicMaterial({ 0.8, 0.6, 0.2 }, 1.0);
 
-        world.add(new Sphere(glm::dvec3(0.0, -100.5, -1.0), 100.0, material_ground));
-        world.add(new Sphere(glm::dvec3(0.0, 0.0, -1.2), 0.5, material_center));
-        world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.5, material_left));
-        world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.4, material_bubble));
-        world.add(new Sphere(glm::dvec3(1.0, 0.0, -1.0), 0.5, material_right));
+        //world.add(new Sphere(glm::dvec3(0.0, -100.5, -1.0), 100.0, material_ground));
+
+        Sphere* sphere = new Sphere(glm::dvec3(0.0, 0.0, -1.2), 0.5, material_center);
+        sphere->set_position(glm::vec3(0, 0.5, 0));
+
+        world.add(sphere);
+        //world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.5, material_left));
+        //world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.4, material_bubble));
+        //world.add(new Sphere(glm::dvec3(1.0, 0.0, -1.0), 0.5, material_right));
 
         tracing_camera.lookfrom = glm::dvec3(0.0);
         tracing_camera.lookat = glm::dvec3(0.0, 0.0, -1.0);
         tracing_camera.vup = glm::dvec3(0.0, 1.0, 0.0);
 
-        tracing_camera.samples_per_pixel = 25;
+        tracing_camera.samples_per_pixel = 1;
 
         tracing_camera.vfov = 90;
+
+        tracing_camera.background = { 0.7, 0.8, 1.0 };
     }
 
     void bouncing_spheres(HittableList& world, sTracingCamera& tracing_camera)
@@ -92,6 +99,8 @@ namespace scenes {
 
         tracing_camera.defocus_angle = 0.6;
         tracing_camera.focus_dist = 10.0;
+
+        tracing_camera.background = { 0.7, 0.8, 1.0 };
     }
 
     void checkered_spheres(HittableList& world, sTracingCamera& tracing_camera)
@@ -110,6 +119,8 @@ namespace scenes {
         tracing_camera.vup = glm::dvec3(0, 1, 0);
 
         tracing_camera.defocus_angle = 0;
+
+        tracing_camera.background = { 0.7, 0.8, 1.0 };
     }
 
     void earth(HittableList& world, sTracingCamera& tracing_camera)
@@ -127,6 +138,8 @@ namespace scenes {
         tracing_camera.vup = glm::dvec3(0, 1, 0);
 
         tracing_camera.defocus_angle = 0;
+
+        tracing_camera.background = { 0.7, 0.8, 1.0 };
     }
 
     void quads(HittableList& world, sTracingCamera& tracing_camera)
@@ -151,6 +164,57 @@ namespace scenes {
         tracing_camera.vfov = 80;
         tracing_camera.lookfrom = glm::dvec3(0, 0, 9);
         tracing_camera.lookat = glm::dvec3(0, 0, 0);
+        tracing_camera.vup = glm::dvec3(0, 1, 0);
+
+        tracing_camera.defocus_angle = 0;
+
+        tracing_camera.background = { 0.7, 0.8, 1.0 };
+    }
+
+    void simple_light(HittableList& world, sTracingCamera& tracing_camera)
+    {
+        auto lambertian = new LambertianMaterial(glm::dvec3(1.0, 0.2, 0.2));
+        world.add(new Sphere(glm::dvec3(0, -1000, 0), 1000, lambertian));
+        world.add(new Sphere(glm::dvec3(0, 2, 0), 2, lambertian));
+
+        auto difflight = new DiffuseLight(glm::dvec3(4, 4, 4));
+        world.add(new Quad(glm::dvec3(3, 1, -2), glm::dvec3(2, 0, 0), glm::dvec3(0, 2, 0), difflight));
+
+        tracing_camera.samples_per_pixel = 100;
+        tracing_camera.max_depth = 50;
+
+        tracing_camera.vfov = 20;
+        tracing_camera.lookfrom = glm::dvec3(26, 3, 6);
+        tracing_camera.lookat = glm::dvec3(0, 2, 0);
+        tracing_camera.vup = glm::dvec3(0, 1, 0);
+
+        tracing_camera.defocus_angle = 0;
+    }
+
+    void cornell_box(HittableList& world, sTracingCamera& tracing_camera)
+    {
+        RtMaterial* red = new LambertianMaterial(glm::dvec3(.65, .05, .05));
+        RtMaterial* white = new LambertianMaterial(glm::dvec3(.73, .73, .73));
+        RtMaterial* green = new LambertianMaterial(glm::dvec3(.12, .45, .15));
+        RtMaterial* light = new DiffuseLight(glm::dvec3(15, 15, 15));
+
+        world.add(new Quad(glm::dvec3(555, 0, 0), glm::dvec3(0, 555, 0), glm::dvec3(0, 0, 555), green));
+        world.add(new Quad(glm::dvec3(0, 0, 0), glm::dvec3(0, 555, 0), glm::dvec3(0, 0, 555), red));
+        world.add(new Quad(glm::dvec3(343, 554, 332), glm::dvec3(-130, 0, 0), glm::dvec3(0, 0, -105), light));
+        world.add(new Quad(glm::dvec3(0, 0, 0), glm::dvec3(555, 0, 0), glm::dvec3(0, 0, 555), white));
+        world.add(new Quad(glm::dvec3(555, 555, 555), glm::dvec3(-555, 0, 0), glm::dvec3(0, 0, -555), white));
+        world.add(new Quad(glm::dvec3(0, 0, 555), glm::dvec3(555, 0, 0), glm::dvec3(0, 555, 0), white));
+
+        world.add(box(glm::dvec3(130, 0, 65), glm::dvec3(295, 165, 230), white));
+        world.add(box(glm::dvec3(265, 0, 295), glm::dvec3(430, 330, 460), white));
+
+        tracing_camera.samples_per_pixel = 2;
+        tracing_camera.max_depth = 50;
+        tracing_camera.background = glm::dvec3(0, 0, 0);
+
+        tracing_camera.vfov = 40;
+        tracing_camera.lookfrom = glm::dvec3(278, 278, -800);
+        tracing_camera.lookat = glm::dvec3(278, 278, 0);
         tracing_camera.vup = glm::dvec3(0, 1, 0);
 
         tracing_camera.defocus_angle = 0;

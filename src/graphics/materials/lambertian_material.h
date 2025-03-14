@@ -8,7 +8,7 @@
 
 class LambertianMaterial : public RtMaterial {
 
-    RtTexture* tex;
+    RtTexture* tex = nullptr;
 
 public:
     LambertianMaterial(const glm::dvec3& albedo) : tex(new SolidColor(albedo)) {}
