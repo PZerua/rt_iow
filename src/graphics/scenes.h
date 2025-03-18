@@ -5,6 +5,8 @@
 #include "hittables/sphere.h"
 #include "hittables/quad.h"
 
+#include "glm/gtc/quaternion.hpp"
+
 #include "graphics/materials/lambertian_material.h"
 #include "graphics/materials/metallic_material.h"
 #include "graphics/materials/dielectric_material.h"
@@ -22,10 +24,9 @@ namespace scenes {
         RtMaterial* material_bubble = new DielectricMaterial(1.0 / 1.5);
         RtMaterial* material_right = new MetallicMaterial({ 0.8, 0.6, 0.2 }, 1.0);
 
-        //world.add(new Sphere(glm::dvec3(0.0, -100.5, -1.0), 100.0, material_ground));
+        world.add(new Sphere(glm::dvec3(0.0, -100.5, -1.0), 100.0, material_ground));
 
         Sphere* sphere = new Sphere(glm::dvec3(0.0, 0.0, -1.2), 0.5, material_center);
-        sphere->set_position(glm::vec3(0, 0.5, 0));
 
         world.add(sphere);
         //world.add(new Sphere(glm::dvec3(-1.0, 0.0, -1.0), 0.5, material_left));
@@ -36,7 +37,7 @@ namespace scenes {
         tracing_camera.lookat = glm::dvec3(0.0, 0.0, -1.0);
         tracing_camera.vup = glm::dvec3(0.0, 1.0, 0.0);
 
-        tracing_camera.samples_per_pixel = 1;
+        tracing_camera.samples_per_pixel = 50;
 
         tracing_camera.vfov = 90;
 
@@ -90,7 +91,7 @@ namespace scenes {
         world.add(new Sphere({ 4, 1, 0 }, 1.0, material3));
 
         tracing_camera.samples_per_pixel = 10;
-        tracing_camera.max_depth = 50;
+        tracing_camera.max_depth = 5;
 
         tracing_camera.vfov = 20;
         tracing_camera.lookfrom = glm::dvec3(13, 2, 3);
@@ -205,11 +206,18 @@ namespace scenes {
         world.add(new Quad(glm::dvec3(555, 555, 555), glm::dvec3(-555, 0, 0), glm::dvec3(0, 0, -555), white));
         world.add(new Quad(glm::dvec3(0, 0, 555), glm::dvec3(555, 0, 0), glm::dvec3(0, 555, 0), white));
 
-        world.add(box(glm::dvec3(130, 0, 65), glm::dvec3(295, 165, 230), white));
-        world.add(box(glm::dvec3(265, 0, 295), glm::dvec3(430, 330, 460), white));
+        HittableList* right_box = box(glm::dvec3(0, 0, 0), glm::dvec3(165, 330, 165), white);
+        right_box->set_position(glm::vec3(265, 0, 295));
+        right_box->set_rotation(glm::angleAxis(glm::radians(15.0f), glm::vec3(0, 1, 0)));
+        world.add(right_box);
 
-        tracing_camera.samples_per_pixel = 2;
-        tracing_camera.max_depth = 50;
+        HittableList* left_box = box(glm::dvec3(0, 0, 0), glm::dvec3(165, 165, 165), white);
+        left_box->set_position(glm::vec3(130, 0, 65));
+        left_box->set_rotation(glm::angleAxis(glm::radians(-18.0f), glm::vec3(0, 1, 0)));
+        world.add(left_box);
+
+        tracing_camera.samples_per_pixel = 20;
+        tracing_camera.max_depth = 25;
         tracing_camera.background = glm::dvec3(0, 0, 0);
 
         tracing_camera.vfov = 40;

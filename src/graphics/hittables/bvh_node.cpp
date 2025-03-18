@@ -11,7 +11,7 @@ BVHNode::BVHNode(std::vector<Hittable*>& objects, size_t start, size_t end)
     // Build the bounding box of the span of source objects.
     bbox = AABB();
     for (size_t object_index = start; object_index < end; object_index++)
-        bbox = merge_aabbs(bbox, objects[object_index]->bounding_box());
+        bbox = merge_aabbs(bbox, objects[object_index]->global_bounding_box());
 
     int axis = bbox.longest_axis();
 
@@ -38,7 +38,7 @@ BVHNode::BVHNode(std::vector<Hittable*>& objects, size_t start, size_t end)
 }
 
 inline bool BVHNode::hit(const Ray& r, const Interval& ray_t, hit_record& rec) const {
-    if (!bbox.ray_intersection(r.origin(), r.direction(), ray_t.min, ray_t.max))
+    if (!ray_aabb_interval_intersection(r, ray_t, bbox))
         return false;
 
     bool hit_left = left->hit(r, ray_t, rec);

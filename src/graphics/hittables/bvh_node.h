@@ -3,6 +3,7 @@
 #include "graphics/aabb.h"
 #include "hittable.h"
 #include "hittable_list.h"
+#include "graphics/utils.h"
 
 class BVHNode : public Hittable {
 public:
@@ -19,9 +20,9 @@ private:
     static bool box_compare(
         const Hittable* a, const Hittable* b, int axis_index
     ) {
-        float a_axis_interval = a->bounding_box().axis_min(axis_index);
-        float b_axis_interval = b->bounding_box().axis_min(axis_index);
-        return a_axis_interval < b_axis_interval;
+        Interval a_axis_interval = axis_interval(a->global_bounding_box(), axis_index);
+        Interval b_axis_interval = axis_interval(b->global_bounding_box(), axis_index);
+        return a_axis_interval.min < b_axis_interval.min;
     }
 
     static bool box_x_compare(const Hittable* a, const Hittable* b) {

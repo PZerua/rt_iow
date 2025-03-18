@@ -31,6 +31,7 @@ class Hittable {
 
 protected:
     Transform transform;
+    glm::mat4x4 inv_model = glm::mat4x4(1.0f);
     AABB bbox;
 
 public:
@@ -43,20 +44,24 @@ public:
 
     void set_transform(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
         transform = Transform(position, rotation, scale);
+        inv_model = glm::inverse(transform.get_model());
     }
 
     void set_position(const glm::vec3& position) {
         transform.set_position(position);
         transform.cache_model();
+        inv_model = glm::inverse(transform.get_model());
     }
 
     void set_rotation(const glm::quat& rotation) {
         transform.set_rotation(rotation);
         transform.cache_model();
+        inv_model = glm::inverse(transform.get_model());
     }
 
     void set_scale(const glm::vec3& scale) {
         transform.set_scale(scale);
         transform.cache_model();
+        inv_model = glm::inverse(transform.get_model());
     }
 };
