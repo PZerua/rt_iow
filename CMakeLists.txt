@@ -57,67 +57,6 @@ if (MSVC)
     add_compile_options(/Zc:__cplusplus)
 endif()
 
-if (EMSCRIPTEN)
-    set(SHELL_FILE shell.html)
-
-    include_directories(BEFORE
-        "${CMAKE_BINARY_DIR}/_deps/emdawn-src/include/"
-    )
-
-    add_library(webgpu_layer
-        "${CMAKE_BINARY_DIR}/_deps/emdawn-src/webgpu.cpp"
-    )
-    target_link_libraries(${PROJECT_NAME}
-        webgpu_layer
-    )
-
-    target_link_options(${PROJECT_NAME} PRIVATE
-
-        # We are using Dawn-generated bindings, not built-in ones
-        -sUSE_WEBGPU=0
-        # The JS libraries needed for bindings
-        "--js-library=${CMAKE_BINARY_DIR}/_deps/emdawn-src/library_webgpu_enum_tables.js"
-        "--js-library=${CMAKE_BINARY_DIR}/_deps/emdawn-src/library_webgpu_generated_struct_info.js"
-        "--js-library=${CMAKE_BINARY_DIR}/_deps/emdawn-src/library_webgpu_generated_sig_info.js"
-        "--js-library=${CMAKE_BINARY_DIR}/_deps/emdawn-src/library_webgpu.js"
-        "--closure-args=--externs=${CMAKE_BINARY_DIR}/_deps/emdawn-src/webgpu-externs.js"
-
-        "$<$<CONFIG:Release>:-flto>"
-
-        -sUSE_GLFW=3
-        -sALLOW_MEMORY_GROWTH
-        -sASYNCIFY
-#        -sWASM=0
-        -sASSERTIONS
-#        -sUSE_PTHREADS
-#        -sPTHREAD_POOL_SIZE=4
-#        -fsanitize=address
-#        -sMAXIMUM_MEMORY=2GB
-        -Wdeprecated-literal-operator
-        -sSTACK_SIZE=5MB
-#        -sASYNCIFY_STACK_SIZE=10000
-        --embind
-#        -O3
-        -sWASM_BIGINT
-        # only for dev
-#        -sERROR_ON_WASM_CHANGES_AFTER_LINK
-#        -O0
-        # ------------
-
-        --shell-file "${PROJECT_DIR_ROOT}/${SHELL_FILE}"
-        --preload-file "${PROJECT_DIR_ROOT}/data@/data"
-	)
-
-	# Make sure to re-link when the shell file changes
-    set_property(
-        TARGET ${PROJECT_NAME}
-        PROPERTY LINK_DEPENDS
-        "${PROJECT_DIR_ROOT}/${SHELL_FILE}"
-    )
-
-    set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
-endif()
-
 # wgpuEngine
 add_subdirectory(libraries/wgpuEngine)
 target_link_libraries(${PROJECT_NAME} webgpuEngine)

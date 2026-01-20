@@ -3,6 +3,7 @@
 bool Sphere::hit(const Ray& ray, const Interval& interval, hit_record& rec) const
 {
     glm::mat4x4 model = transform.get_model();
+    glm::mat4x4 inv_model = glm::inverse(model);
 
     Ray ray_local(inv_model * glm::dvec4(ray.origin(), 1.0), inv_model * glm::dvec4(ray.direction(), 0.0), ray.time());
 
